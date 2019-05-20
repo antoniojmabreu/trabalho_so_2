@@ -18,7 +18,7 @@ Abstrata* insertNode(Abstrata *A, Abstrata *nv) {  //estilo insertFirst para nã
   return nv;
 }
 
-Abstrata* removeAbstrata(Abstrata *A, int id) {  //remove por id e devolve cabeça da lista atualizada
+Abstrata* removeNodeId(Abstrata *A, int id) {  //remove por id e devolve cabeça da lista atualizada
   Abstrata *head = A, *prev = A;
 
   while(A != NULL) {
