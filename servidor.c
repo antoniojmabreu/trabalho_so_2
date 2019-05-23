@@ -1,8 +1,16 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <string.h>
+#include <unistd.h>
+#define SR sizeof(float)
+#define FIFO1 "/tmp/fifo.1"
+#define FIFO2 "/tmp/fifo.2"
+#define PERMS 0666
+#define SIZE 200
 
-#define SIZE 40
 
 //typedef's
 typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos IDs
@@ -12,7 +20,7 @@ typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos I
 }Abstrata;
 
 
-Abstrata* insertNode(Abstrata *A, Abstrata *nv) {      //insere uma nova mensagem na struct                                             
+Abstrata* insertNode(Abstrata *A, Abstrata *nv) {      //insere uma nova mensagem na struct
                                                        //estilo insertFirst para não ter de correr as listas para descobrir o ultimo elemento
 	if(A == NULL)                                        //mais rápido do que a altenativa insertLast
 		return nv;
@@ -41,15 +49,11 @@ Abstrata* removeNodeId(Abstrata *A, int id) {  //remove por id e devolve cabeça
   return head;
 }
 
-Abstrata* createNode(int ID) {  //cria uma nova mensagem
-  char text[SIZE];
-
-  printf("Insert content\n");
-  scanf("%s", text);
+Abstrata* createNode(int ID, char content[]) {  //cria uma nova mensagem
 
   Abstrata *newAbstrata = (Abstrata*)malloc(sizeof(Abstrata));
   newAbstrata->msgId = ID;
-  strcpy(newAbstrata->content, text);
+  strcpy(newAbstrata->content, content);
 
   return newAbstrata;
 }
@@ -63,58 +67,45 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
   }
 }
 
-void printMenu() {
-  printf("\n\n1 -> Insert new\n2 -> List all\n3 -> Remove msg\n0 -> exit\n\n->");
-}
 
-int main() {  //main
+int main () {
+  mknod(FIFO1, S_IFIFO | PERMS, 0);
+  mknod(FIFO2, S_IFIFO | PERMS, 0);
+  float readfd, writefd;
+  int select, x, ID;
+  char content[SIZE];
+
   Abstrata *list = NULL;
-  int ID = 0, select, x;
-
-  printMenu();
 
   while(1) {
-    scanf("%d", &select);
-    switch (select) {
-      case 1:
-        //inserir nova mensagem na lista
-        ID++;
-        Abstrata *new = createNode(ID);
-        list = insertNode(list, new);
+    readfd = open(FIFO1, 0);
+    read(readfd, &select, sizeof(int));
+    read(readfd, &ID, sizeof(int));
+    read(readfd, &x, sizeof(int));
+    read(readfd, &content, sizeof(content));
 
-        printMenu();
+    switch (select){
+      case 1 :
+        list = insertNode(list, createNode(ID, content));
       break;
-
-      case 2:
-        //listar todas as mensagens
+      case 2 :
         if(list == NULL)
           printf("\nNo messages\n");
 
-        else
+        else {
+          printf("%s\n", content);
           listNodes(list);
-
-        printMenu();
+          writefd = open(FIFO2, 1);
+          write (writefd, &list, sizeof(Abstrata*));
+        }
       break;
-
-      case 3:
-        //remove mensagem por id
-        printf("Insert id to remove\n");
-        scanf("%d", &x);
-
+      case 3 :
         list = removeNodeId(list, x);
-
-        printMenu();
-      break;
-
-      case 0:
-        //sair
-        exit(1);
-      break;
-
-      default:
-        printf("\n !!! Seleção inválida !!!\n\n Selecione Opção -> ");
-        continue;
       break;
     }
+
+    //writefd = open(FIFO2, 1);
+    //write (writefd, &res, SR);
   }
+  return 0;
 }
