@@ -37,7 +37,7 @@ int main () {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   int ID = 0, select, x, msgid, flag;
-  char content[SIZE], msgcnt[SIZE];
+  char content[SIZE] = {}, msgcnt[SIZE];
 
   printMenu();
 
@@ -49,7 +49,10 @@ int main () {
         ID++;
 
         printf("Type mesage content:\n");
-        scanf("%s", &content);
+        //fgets(content, SIZE, stdin);
+        scanf("%10[0-9a-zA-Z ]", content);
+        printf("%s\n", content);
+
 
         writefd = open(FIFO1, 1);
         write(writefd, &select, sizeof(int));
@@ -57,7 +60,7 @@ int main () {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
 
-        printMenu();
+        //printMenu();
       break;
 
       case 2:
