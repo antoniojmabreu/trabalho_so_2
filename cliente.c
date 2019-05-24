@@ -28,7 +28,7 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
 }
 
 void printMenu() {
-  printf("\n\n1 -> Insert new\n2 -> List all\n3 -> Remove msg\n0 -> exit\n\n->");
+  printf("\n\n1 -> New message\n2 -> List all\n3 -> Remove msg\n0 -> exit\n\n->");
 }
 
 
@@ -48,9 +48,8 @@ int main () {
         //inserir nova mensagem na lista
         ID++;
 
-        printf("Insert content\n");
-        scanf("%s", content);
-        printf("%s\n", content);
+        printf("Type mesage content:\n");
+        scanf("%s", &content);
 
         writefd = open(FIFO1, 1);
         write(writefd, &select, sizeof(int));
