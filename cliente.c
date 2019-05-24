@@ -28,7 +28,7 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
 }
 
 void printMenu() {
-  printf("\n\n1 -> New message\n2 -> List all\n3 -> Remove msg\n0 -> exit\n\n->");
+  printf("\n\n1 -> New message\n2 -> Show all messages\n3 -> Remove message\n0 -> exit\n\n->");
 }
 
 
