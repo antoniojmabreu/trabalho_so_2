@@ -9,7 +9,7 @@
 #define FIFO1 "/tmp/fifo.1"
 #define FIFO2 "/tmp/fifo.2"
 #define PERMS 0666
-#define SIZE 200
+#define SIZE 500
 
 //typedef's
 typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos IDs
@@ -36,9 +36,8 @@ int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
-  int ID = 0, select, x;
-  char content[SIZE];
-  Abstrata *list = NULL;
+  int ID = 0, select, x, msgid, flag;
+  char content[SIZE], msgcnt[SIZE];
 
   printMenu();
 
@@ -70,15 +69,23 @@ int main () {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
 
-        //readfd = open(FIFO2, 0);
-        //read(readfd, &cont, SR);
-
-
-          printf("else\n");
+        while (1) {
           readfd = open(FIFO2, 0);
-          read(readfd, &list, sizeof(Abstrata*));
+          read(readfd, &msgid, sizeof(int));
+          read(readfd, &msgcnt, sizeof(msgcnt));
+          read(readfd, &flag, sizeof(int));
 
-          listNodes(list);
+          if(flag == -1) {
+            printf("\nNo messages\n");
+            break;
+          }
+
+          printf("msgid %d\n", msgid);
+          printf("msgcnt %s\n\n", msgcnt);
+
+          if(flag == 1)
+            break;
+        }
 
         printMenu();
       break;

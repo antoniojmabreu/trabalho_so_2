@@ -9,7 +9,7 @@
 #define FIFO1 "/tmp/fifo.1"
 #define FIFO2 "/tmp/fifo.2"
 #define PERMS 0666
-#define SIZE 200
+#define SIZE 500
 
 
 //typedef's
@@ -72,10 +72,10 @@ int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
-  int select, x, ID;
-  char content[SIZE];
+  int select, x, ID, msgid, count = 0, flag;
+  char content[SIZE], msgcnt[SIZE];
 
-  Abstrata *list = NULL;
+  Abstrata *list = NULL, *head = NULL;
 
   while(1) {
     readfd = open(FIFO1, 0);
@@ -87,25 +87,46 @@ int main () {
     switch (select){
       case 1 :
         list = insertNode(list, createNode(ID, content));
+        count++;
       break;
       case 2 :
-        if(list == NULL)
+        if(list == NULL) {
+          flag = -1;
           printf("\nNo messages\n");
 
-        else {
-          printf("%s\n", content);
-          listNodes(list);
           writefd = open(FIFO2, 1);
-          write (writefd, &list, sizeof(Abstrata*));
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+        }
+        else {
+          flag = count;
+          head = list;
+
+          while(list != NULL) {
+            msgid = list->msgId;
+            printf("%d\n", list->msgId);
+            strcpy(msgcnt, list->content);
+            writefd = open(FIFO2, 1);
+            write (writefd, &msgid, sizeof(int));
+            write (writefd, &msgcnt, sizeof(msgcnt));
+            write (writefd, &flag, sizeof(int));
+            printf("flag %d\n", flag);
+            flag--;
+
+            list = list->nseg;
+          }
+          list = head;
+          listNodes(list);
         }
       break;
       case 3 :
         list = removeNodeId(list, x);
+        listNodes(list);
+        if(count > 0)
+          count--;
       break;
     }
-
-    //writefd = open(FIFO2, 1);
-    //write (writefd, &res, SR);
   }
   return 0;
 }
