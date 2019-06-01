@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <pthread.h>
 #define SR sizeof(float)
 #define FIFO1 "/tmp/fifo.1"
 #define FIFO2 "/tmp/fifo.2"
@@ -17,6 +18,10 @@ typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos I
   char content[SIZE];
   struct ABSTRATA *nseg;
 }Abstrata;
+
+typedef struct SELECT_T {
+  int select;
+}select_t;
 
 void listNodes(Abstrata  *A) {  //lista todas as mensagens
   while(A != NULL) {
@@ -31,14 +36,16 @@ void printMenu() {
   printf("\n\n1 -> New message\n2 -> Show all messages\n3 -> Remove message\n0 -> exit\n\n->");
 }
 
+//void * thread(void *args) {
+int main() {
 
-int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
-  int ID = 0, select, x, msgid, flag;
+  int ID = 0, x, msgid, flag, select;
   char content[SIZE] = {}, msgcnt[SIZE];
-
+  //select_t * ptr = (select_t *)args;
+  printf("check 2\n" );
   printMenu();
 
   while(1) {
@@ -50,9 +57,8 @@ int main () {
 
         printf("Type mesage content:\n");
         //fgets(content, SIZE, stdin);
-        scanf("%10[0-9a-zA-Z ]", content);
+        scanf("%s", content);
         printf("%s\n", content);
-
 
         writefd = open(FIFO1, 1);
         write(writefd, &select, sizeof(int));
@@ -60,7 +66,7 @@ int main () {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
 
-        //printMenu();
+        printMenu();
       break;
 
       case 2:
@@ -127,3 +133,19 @@ int main () {
 
   return 0;
 }
+/*
+int main() {
+  int select = 0;
+  pthread_t th;
+
+  while (1) {
+    printMenu();
+    scanf("%d", &select);
+    select_t * ptr = (select_t *)malloc( sizeof(select_t));
+    ptr->select = select;
+    pthread_create(&th, NULL, thread, (void *)ptr);
+    pthread_join(th, NULL);
+    printf("check 1\n" );
+  }
+}
+*/
