@@ -10,9 +10,29 @@
 #define FIFO2 "/tmp/fifo.2"
 #define PERMS 0666
 #define SIZE 500
-#include "lista.c"
 
-int main () { 
+//typedef's
+typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos IDs
+  int msgId;
+  char content[SIZE];
+  struct ABSTRATA *nseg;
+}Abstrata;
+
+void listNodes(Abstrata  *A) {  //lista todas as mensagens
+  while(A != NULL) {
+    printf("\nmsgId: %d\n", A->msgId);
+    printf("content: \n%s\n\n", A->content);
+
+    A = A->nseg;
+  }
+}
+
+void printMenu() {
+  printf("\n\n1 -> New message\n2 -> Show all messages\n3 -> Remove message\n0 -> exit\n\n->");
+}
+
+
+int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
