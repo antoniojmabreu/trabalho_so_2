@@ -2,11 +2,8 @@
 #include<stdlib.h>
 #include <string.h>
 
-<<<<<<< HEAD
-=======
 #define SIZE 40
 
->>>>>>> 187b072e286aa5c8a1ad6cea6870f64807d7dfe5
 //typedef's
 typedef struct ABSTRATA {  //pixeis pertencentes ao intervalo de cor num determinado frame
   int msgId;
@@ -57,18 +54,6 @@ Abstrata* createNode(int ID) {
   return newAbstrata;
 }
 
-<<<<<<< HEAD
-Abstrata* createNodeServer(int ID, char content[]) {  //cria uma nova mensagem
-
-  Abstrata *newAbstrata = (Abstrata*)malloc(sizeof(Abstrata));
-  newAbstrata->msgId = ID;
-  strcpy(newAbstrata->content, content);
-
-  return newAbstrata;
-}
-
-=======
->>>>>>> 187b072e286aa5c8a1ad6cea6870f64807d7dfe5
 void listNodes(Abstrata  *A) {
   while(A != NULL) {
     printf("\nmsgId: %d\n", A->msgId);
@@ -81,8 +66,6 @@ void listNodes(Abstrata  *A) {
 void printMenu() {
   printf("\n\n1 -> Insert new\n2 -> List all\n3 -> Remove msg\n0 -> exit\n\n->");
 }
-<<<<<<< HEAD
-=======
 
 int main() {
   Abstrata *list = NULL;
@@ -135,4 +118,3 @@ int main() {
     }
   }
 }
->>>>>>> 187b072e286aa5c8a1ad6cea6870f64807d7dfe5

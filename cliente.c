@@ -19,13 +19,10 @@ typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos I
   struct ABSTRATA *nseg;
 }Abstrata;
 
-<<<<<<< HEAD
-=======
 typedef struct SELECT_T {
   int select;
 }select_t;
 
->>>>>>> 187b072e286aa5c8a1ad6cea6870f64807d7dfe5
 void listNodes(Abstrata  *A) {  //lista todas as mensagens
   while(A != NULL) {
     printf("\nmsgId: %d\n", A->msgId);
@@ -39,14 +36,9 @@ void printMenu() {
   printf("\n\n1 -> New message\n2 -> Show all messages\n3 -> Remove message\n0 -> exit\n\n->");
 }
 
-<<<<<<< HEAD
-
-int main () {
-=======
 //void * thread(void *args) {
 int main() {
 
->>>>>>> 187b072e286aa5c8a1ad6cea6870f64807d7dfe5
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
