@@ -11,7 +11,10 @@
 #define PERMS 0666
 #define SIZE 500
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 187b072e286aa5c8a1ad6cea6870f64807d7dfe5
 //typedef's
 typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos IDs
   int msgId;
