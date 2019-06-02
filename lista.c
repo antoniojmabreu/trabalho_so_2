@@ -61,7 +61,7 @@ Abstrata* createNodeServer(int ID, char content[]) {  //cria uma nova mensagem
 
   return newAbstrata;
 }
-
+ 
 void listNodes(Abstrata  *A) {
   while(A != NULL) {
     printf("\nmsgId: %d\n", A->msgId);

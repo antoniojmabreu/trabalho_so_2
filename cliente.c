@@ -12,7 +12,7 @@
 #define SIZE 500
 #include "lista.c"
 
-int main () {
+int main () { 
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
