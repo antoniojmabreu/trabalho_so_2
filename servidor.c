@@ -67,6 +67,19 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
   }
 }
 
+int findMsg(Abstrata *A, int ID) {
+  Abstrata *head = A;
+
+  while(A != NULL) {
+    if(A->msgId == ID)
+      return 1;
+    A = A->nseg;
+  }
+  A = head;
+
+  return 0;
+}
+
 
 int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
@@ -121,10 +134,21 @@ int main () {
         }
       break;
       case 3 :
-        list = removeNodeId(list, x);
+        flag = 0;
+
         listNodes(list);
-        if(count > 0)
-          count--;
+        if(findMsg(list, x) == 1) {
+          flag = 1;
+          list = removeNodeId(list, x);
+          if(count > 0)
+            count--;
+        }
+
+        writefd = open(FIFO2, 1);
+        write (writefd, &msgid, sizeof(int));
+        write (writefd, &msgcnt, sizeof(msgcnt));
+        write (writefd, &flag, sizeof(int));
+
       break;
     }
   }

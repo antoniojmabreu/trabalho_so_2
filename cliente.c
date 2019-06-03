@@ -23,15 +23,6 @@ typedef struct SELECT_T {
   int select;
 }select_t;
 
-void listNodes(Abstrata  *A) {  //lista todas as mensagens
-  while(A != NULL) {
-    printf("\nmsgId: %d\n", A->msgId);
-    printf("content: \n%s\n\n", A->content);
-
-    A = A->nseg;
-  }
-}
-
 void printMenu() {
   printf("\n\n1 -> New message\n2 -> Show all messages\n3 -> Remove message\n0 -> exit\n\n->");
 }
@@ -110,6 +101,14 @@ int main() {
         write(writefd, &ID, sizeof(int));
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
+
+        readfd = open(FIFO2, 0);
+        read(readfd, &msgid, sizeof(int));
+        read(readfd, &msgcnt, sizeof(msgcnt));
+        read(readfd, &flag, sizeof(int));
+
+        if(flag == 0)
+          printf("O id '%d' não existe\n", x);
 
         printMenu();
       break;
