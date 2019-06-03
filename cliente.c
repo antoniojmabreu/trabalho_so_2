@@ -36,6 +36,7 @@ void printMenu() {
   printf("\n\n1 -> New message\n2 -> Show all messages\n3 -> Remove message\n0 -> exit\n\n->");
 }
 
+
 //void * thread(void *args) {
 int main() {
 
@@ -43,7 +44,7 @@ int main() {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   int ID = 0, x, msgid, flag, select;
-  char content[SIZE] = {}, msgcnt[SIZE];
+  char msgcnt[SIZE], content[SIZE];
   //select_t * ptr = (select_t *)args;
   printf("check 2\n" );
   printMenu();
@@ -52,12 +53,13 @@ int main() {
     scanf("%d", &select);
     switch (select) {
       case 1:
+
         //inserir nova mensagem na lista
         ID++;
-
+        getchar();
         printf("Type mesage content:\n");
-        //fgets(content, SIZE, stdin);
-        scanf("%s", content);
+        //fflush(stdin);
+        fgets(content, SIZE, stdin);
         printf("%s\n", content);
 
         writefd = open(FIFO1, 1);
