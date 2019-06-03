@@ -125,7 +125,7 @@ int main() {
       break;
     }
   }
-
+//
   //readfd = open(FIFO2, 0);
   //read(readfd, &res, SR);
 
