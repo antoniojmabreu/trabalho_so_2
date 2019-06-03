@@ -67,6 +67,48 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
   }
 }
 
+void escreverDados(Abstrata *A) {
+  FILE* fout = fopen("data.dat", "w");
+
+  if (fout == NULL) {
+    fprintf(stderr, "\nError opend file\n");
+    exit (1);
+  }
+
+  fwrite(&A, sizeof(Abstrata), 1, fout);
+  fclose(fout);
+
+}
+
+Abstrata* carregaDados() {
+  Abstrata *newAbstrata; //= (Abstrata*)malloc(sizeof(Abstrata));
+
+  FILE* fin = fopen("data.dat", "r");
+
+  if (fin == NULL) {
+    fprintf(stderr, "\nError opend file\n");
+    exit (1);
+  }
+
+  while(fread(&newAbstrata, sizeof(Abstrata), 1, fin))
+    fread(&newAbstrata, sizeof(Abstrata), 1, fin);
+
+  fclose(fin);
+
+  return newAbstrata;
+}
+
+int countMsg(Abstrata *A) {
+  int count = 0;
+
+  while(A != NULL) {
+    count++;
+    A = A->nseg;
+  }
+  return count;
+}
+
+
 int findMsg(Abstrata *A, int ID) {
   Abstrata *head = A;
 
@@ -85,10 +127,11 @@ int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
+  Abstrata *list = NULL, *head = NULL;
   int select, x, ID, msgid, count = 0, flag;
   char content[SIZE], msgcnt[SIZE];
 
-  Abstrata *list = NULL, *head = NULL;
+  list = carregaDados();
 
   while(1) {
     readfd = open(FIFO1, 0);
@@ -100,7 +143,7 @@ int main () {
     switch (select){
       case 1 :
         list = insertNode(list, createNode(ID, content));
-        count++;
+        //count++;
       break;
       case 2 :
         if(list == NULL) {
@@ -113,6 +156,7 @@ int main () {
           write (writefd, &flag, sizeof(int));
         }
         else {
+          count = countMsg(list);
           flag = count;
           head = list;
 
@@ -140,8 +184,8 @@ int main () {
         if(findMsg(list, x) == 1) {
           flag = 1;
           list = removeNodeId(list, x);
-          if(count > 0)
-            count--;
+          //if(count > 0)
+            //count--;
         }
 
         writefd = open(FIFO2, 1);
@@ -149,6 +193,11 @@ int main () {
         write (writefd, &msgcnt, sizeof(msgcnt));
         write (writefd, &flag, sizeof(int));
 
+      break;
+      case 0:
+        escreverDados(list);
+        free(list);
+        exit(1);
       break;
     }
   }

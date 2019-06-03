@@ -108,13 +108,19 @@ int main() {
         read(readfd, &flag, sizeof(int));
 
         if(flag == 0)
-          printf("O id '%d' não existe\n", x);
+          printf("msgId = '%d' não existe\n", x);
 
         printMenu();
       break;
 
       case 0:
         //sair
+        writefd = open(FIFO1, 1);
+        write(writefd, &select, sizeof(int));
+        write(writefd, &ID, sizeof(int));
+        write(writefd, &x, sizeof(int));
+        write(writefd, &content, sizeof(content));
+
         exit(1);
       break;
 
