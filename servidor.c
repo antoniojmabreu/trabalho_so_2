@@ -71,7 +71,7 @@ Abstrata* escreverDados(Abstrata *A) {
   FILE* fout = fopen("data.txt", "w");
   Abstrata *head = A;
 
-  if (fout == NULL) {
+  if(fout == NULL) {
     fprintf(stderr, "\nError opend file\n");
     exit (1);
   }
@@ -94,16 +94,14 @@ void carregaDados(Abstrata **A) {
 
   *A = removeNodeId(*A, 0);
 
-  if (fin == NULL) {
+  if(fin == NULL) {
     fprintf(stderr, "\nError opend file\n");
     exit (1);
   }
 
   while(!feof(fin)) {
     fgets(a, SIZE, fin);
-    printf("int %d\n", atoi(a));
     fgets(c, SIZE, fin);
-    printf("char %s\n", c);
 
     *A = insertNode(*A, createNode(atoi(a), c));
     fgets(c, SIZE, fin);
@@ -147,7 +145,7 @@ int main () {
   char content[SIZE], msgcnt[SIZE];
 
   carregaDados(&list);
-  //list = removeNodeId(list, 0);
+  list = removeNodeId(list, 0);
 
   while(1) {
     readfd = open(FIFO1, 0);
@@ -210,7 +208,6 @@ int main () {
       break;
       case 0:
         list = escreverDados(list);
-        free(list);
         exit(1);
       break;
     }
