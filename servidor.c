@@ -141,8 +141,10 @@ int main () {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   Abstrata *list = NULL, *head = NULL;
-  int select, x, ID, msgid, count = 0, flag;
-  char content[SIZE], msgcnt[SIZE];
+  int select, x, ID, msgid, count = 0, flag,flagfiles;
+  char content[SIZE], msgcnt[SIZE],fich[SIZE];
+  FILE *fp;
+
 
   carregaDados(&list);
   list = removeNodeId(list, 0);
@@ -153,6 +155,7 @@ int main () {
     read(readfd, &ID, sizeof(int));
     read(readfd, &x, sizeof(int));
     read(readfd, &content, sizeof(content));
+    read(readfd, &fich, sizeof(fich));
 
     switch (select){
       case 1 :
@@ -206,6 +209,31 @@ int main () {
         write (writefd, &flag, sizeof(int));
 
       break;
+      case 4:
+        printf("File requested: %s\n",fich);
+        fp = fopen(fich,"r");
+
+        if(fp!=NULL){
+          flagfiles=1;
+          writefd = open(FIFO2, 1);
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+
+
+        }else{
+          flagfiles = -1;
+          writefd = open(FIFO2, 1);
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          printf("No such file \n");
+        }
+
+
+        break;
       case 0:
         list = escreverDados(list);
         exit(1);
