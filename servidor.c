@@ -68,17 +68,18 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
 }
 
 Abstrata* escreverDados(Abstrata *A) {
+  remove("data.txt");
   FILE* fout = fopen("data.txt", "w");
   Abstrata *head = A;
 
-  if(fout == NULL) {
+  if (fout == NULL) {
     fprintf(stderr, "\nError opend file\n");
     exit (1);
   }
 
   while(A != NULL) {
     fprintf(fout,"%d\n", A->msgId);
-    fprintf(fout,"%s\n", A->content);
+    fprintf(fout,"%s", A->content);
     A = A->nseg;
   }
 
@@ -88,13 +89,10 @@ Abstrata* escreverDados(Abstrata *A) {
 }
 
 void carregaDados(Abstrata **A) {
-
   char c[SIZE], a[SIZE];
   FILE* fin = fopen("data.txt", "r");
 
-  *A = removeNodeId(*A, 0);
-
-  if(fin == NULL) {
+  if (fin == NULL) {
     fprintf(stderr, "\nError opend file\n");
     exit (1);
   }
@@ -104,9 +102,8 @@ void carregaDados(Abstrata **A) {
     fgets(c, SIZE, fin);
 
     *A = insertNode(*A, createNode(atoi(a), c));
-    fgets(c, SIZE, fin);
+    //fgets(c, SIZE, temp);
   }
-
 
   fclose(fin);
 }
@@ -141,10 +138,8 @@ int main () {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   Abstrata *list = NULL, *head = NULL;
-  int select, x, ID, msgid, count = 0, flag,flagfiles;
-  char content[SIZE], msgcnt[SIZE],fich[SIZE];
-  FILE *fp;
-
+  int select, x, ID, msgid, count = 0, flag;
+  char content[SIZE], msgcnt[SIZE];
 
   carregaDados(&list);
   list = removeNodeId(list, 0);
@@ -155,7 +150,6 @@ int main () {
     read(readfd, &ID, sizeof(int));
     read(readfd, &x, sizeof(int));
     read(readfd, &content, sizeof(content));
-    read(readfd, &fich, sizeof(fich));
 
     switch (select){
       case 1 :
@@ -209,33 +203,10 @@ int main () {
         write (writefd, &flag, sizeof(int));
 
       break;
-      case 4:
-        printf("File requested: %s\n",fich);
-        fp = fopen(fich,"r");
-
-        if(fp!=NULL){
-          flagfiles=1;
-          writefd = open(FIFO2, 1);
-          write (writefd, &msgid, sizeof(int));
-          write (writefd, &msgcnt, sizeof(msgcnt));
-          write (writefd, &flag, sizeof(int));
-          write (writefd, &flagfiles, sizeof(int));
-
-
-        }else{
-          flagfiles = -1;
-          writefd = open(FIFO2, 1);
-          write (writefd, &msgid, sizeof(int));
-          write (writefd, &msgcnt, sizeof(msgcnt));
-          write (writefd, &flag, sizeof(int));
-          write (writefd, &flagfiles, sizeof(int));
-          printf("No such file \n");
-        }
-
-
-        break;
       case 0:
+        fflush(stdin);
         list = escreverDados(list);
+        free(list);
         exit(1);
       break;
     }
