@@ -138,16 +138,10 @@ int findMsg(Abstrata *A, int ID) {
 
 int checkFilename(char fich[SIZE]){
 
-int i, charcount = 0;
-
-for(i=0; i<SIZE; i++){
-    if (charcount >=2) break;
-    if(fich[i] == '.' && fich[i+1] != '/') {
-        charcount ++;
+    if(fich[0] == '.' && fich[1] == '.') {
+      return 0;
     }
-}
-if(charcount <= 1 ) return 1;
-return 0;
+  return 1;
 }
 
 
