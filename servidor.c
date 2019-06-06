@@ -73,7 +73,6 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
 }
 
 Abstrata* escreverDados(Abstrata *A) {
-  remove("data.txt");
   FILE* fout = fopen("data.txt", "w");
   Abstrata *head = A;
 
