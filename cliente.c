@@ -35,12 +35,15 @@ int main() {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   int ID = 0, x, msgid, flag, select,select2,flagfiles,flagpass;
-  char msgcnt[SIZE], content[SIZE],fich[SIZE];
-  FILE *fp;
+  char msgcnt[SIZE], content[SIZE],fich[SIZE], a[SIZE];
+  FILE *fp,*fin = fopen("data.txt", "r");
   char c;
   //select_t * ptr = (select_t *)args;
   printf("check 2\n" );
   printMenu();
+
+  fgets(a, SIZE, fin);
+  ID = atoi(a);
 
   while(1) {
     scanf("%d", &select);

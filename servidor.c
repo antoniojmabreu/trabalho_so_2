@@ -19,6 +19,11 @@ typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos I
   struct ABSTRATA *nseg;
 }Abstrata;
 
+typedef struc FILA {
+  int filaId;
+  Abstrata *cabeca;
+  struc FILA *nseg;
+}Fila;
 
 Abstrata* insertNode(Abstrata *A, Abstrata *nv) {      //insere uma nova mensagem na struct
                                                        //estilo insertFirst para não ter de correr as listas para descobrir o ultimo elemento
@@ -68,6 +73,7 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
 }
 
 Abstrata* escreverDados(Abstrata *A) {
+  remove("data.txt");
   FILE* fout = fopen("data.txt", "w");
   Abstrata *head = A;
 
@@ -78,7 +84,7 @@ Abstrata* escreverDados(Abstrata *A) {
 
   while(A != NULL) {
     fprintf(fout,"%d\n", A->msgId);
-    fprintf(fout,"%s\n", A->content);
+    fprintf(fout,"%s", A->content);
     A = A->nseg;
   }
 
@@ -88,11 +94,8 @@ Abstrata* escreverDados(Abstrata *A) {
 }
 
 void carregaDados(Abstrata **A) {
-
   char c[SIZE], a[SIZE];
   FILE* fin = fopen("data.txt", "r");
-
-  *A = removeNodeId(*A, 0);
 
   if (fin == NULL) {
     fprintf(stderr, "\nError opend file\n");
@@ -101,14 +104,11 @@ void carregaDados(Abstrata **A) {
 
   while(!feof(fin)) {
     fgets(a, SIZE, fin);
-    printf("int %d\n", atoi(a));
     fgets(c, SIZE, fin);
-    printf("char %s\n", c);
 
     *A = insertNode(*A, createNode(atoi(a), c));
-    fgets(c, SIZE, fin);
+    //fgets(c, SIZE, temp);
   }
-
 
   fclose(fin);
 }
@@ -164,7 +164,7 @@ int main () {
 
 
   carregaDados(&list);
-  //list = removeNodeId(list, 0);
+  list = removeNodeId(list, 0);
 
   while(1) {
     readfd = open(FIFO1, 0);
@@ -177,7 +177,6 @@ int main () {
     switch (select){
       case 1 :
         list = insertNode(list, createNode(ID, content));
-        //count++;
       break;
       case 2 :
         if(list == NULL) {
@@ -324,6 +323,7 @@ int main () {
 
       break;
       case 0:
+        fflush(stdin);
         list = escreverDados(list);
         free(list);
         exit(1);

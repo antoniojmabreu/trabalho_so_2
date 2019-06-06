@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 0
 
 
@@ -19,3 +20,9 @@ adeus
 2
 
 
+=======
+2
+undo
+1
+ola
+>>>>>>> 13fa9d9d5c2305fddbcb93dc44681b6dbcf6cd4e
