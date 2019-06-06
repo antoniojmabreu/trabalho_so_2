@@ -19,10 +19,10 @@ typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos I
   struct ABSTRATA *nseg;
 }Abstrata;
 
-typedef struc FILA {
+typedef struct FILA {
   int filaId;
   Abstrata *cabeca;
-  struc FILA *nseg;
+  struct FILA *nseg;
 }Fila;
 
 Abstrata* insertNode(Abstrata *A, Abstrata *nv) {      //insere uma nova mensagem na struct
