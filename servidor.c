@@ -137,15 +137,30 @@ int findMsg(Abstrata *A, int ID) {
   return 0;
 }
 
+int checkFilename(char fich[SIZE]){
+
+int i, charcount = 0;
+
+for(i=0; i<SIZE; i++){
+    if (charcount >=2) break;
+    if(fich[i] == '.' && fich[i+1] != '/') {
+        charcount ++;
+    }
+}
+if(charcount <= 1 ) return 1;
+return 0;
+}
+
 
 int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   Abstrata *list = NULL, *head = NULL;
-  int select, x, ID, msgid, count = 0, flag,flagfiles;
-  char content[SIZE], msgcnt[SIZE],fich[SIZE];
+  int select, x, ID, msgid, count = 0, flag,flagfiles,flagpass,check;
+  char content[SIZE], msgcnt[SIZE],fich[SIZE],pass[20];
   FILE *fp;
+  char password[20] = "secret";
 
 
   carregaDados(&list);
@@ -158,7 +173,7 @@ int main () {
     read(readfd, &x, sizeof(int));
     read(readfd, &content, sizeof(content));
     read(readfd, &fich, sizeof(fich));
-
+    read(readfd,&pass,sizeof(pass));
     switch (select){
       case 1 :
         list = insertNode(list, createNode(ID, content));
@@ -173,6 +188,8 @@ int main () {
           write (writefd, &msgid, sizeof(int));
           write (writefd, &msgcnt, sizeof(msgcnt));
           write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
         }
         else {
           count = countMsg(list);
@@ -187,6 +204,8 @@ int main () {
             write (writefd, &msgid, sizeof(int));
             write (writefd, &msgcnt, sizeof(msgcnt));
             write (writefd, &flag, sizeof(int));
+            write (writefd, &flagfiles, sizeof(int));
+            write (writefd, &flagpass, sizeof(int));
             printf("flag %d\n", flag);
             flag--;
 
@@ -209,12 +228,26 @@ int main () {
         write (writefd, &msgid, sizeof(int));
         write (writefd, &msgcnt, sizeof(msgcnt));
         write (writefd, &flag, sizeof(int));
+        write (writefd, &flagfiles, sizeof(int));
+        write (writefd, &flagpass, sizeof(int));
 
       break;
       case 4:
         printf("File requested: %s\n",fich);
-        fp = fopen(fich,"r");
+         check = checkFilename(fich);
+        if(check==0){
 
+          printf("File Not allowed\n");
+          flagfiles = -1;
+          writefd = open(FIFO2, 1);
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
+        }else{
+
+        fp = fopen(fich,"r");
         if(fp!=NULL){
           flagfiles=1;
           writefd = open(FIFO2, 1);
@@ -222,7 +255,7 @@ int main () {
           write (writefd, &msgcnt, sizeof(msgcnt));
           write (writefd, &flag, sizeof(int));
           write (writefd, &flagfiles, sizeof(int));
-
+          write (writefd, &flagpass, sizeof(int));
 
         }else{
           flagfiles = -1;
@@ -231,16 +264,71 @@ int main () {
           write (writefd, &msgcnt, sizeof(msgcnt));
           write (writefd, &flag, sizeof(int));
           write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
+
           printf("No such file \n");
         }
 
-
+      }
         break;
+      case 5:
+      printf("File requested: %s\n",fich);
+      printf("Password inserida: %s\n",pass);
+
+       check = checkFilename(fich);
+      if(check==0){
+        printf("File Not allowed\n");
+        flagfiles = -1;
+        flagpass = -1;
+        writefd = open(FIFO2, 1);
+        write (writefd, &msgid, sizeof(int));
+        write (writefd, &msgcnt, sizeof(msgcnt));
+        write (writefd, &flag, sizeof(int));
+        write (writefd, &flagfiles, sizeof(int));
+        write (writefd, &flagpass, sizeof(int));
+      }else{
+
+      if(strcmp(pass,password)==0){
+      fp = fopen(fich,"r");
+      if(fp!=NULL){
+        flagfiles=1;
+        writefd = open(FIFO2, 1);
+        write (writefd, &msgid, sizeof(int));
+        write (writefd, &msgcnt, sizeof(msgcnt));
+        write (writefd, &flag, sizeof(int));
+        write (writefd, &flagfiles, sizeof(int));
+        write (writefd, &flagpass, sizeof(int));
+      }else{
+        flagfiles = -1;
+        writefd = open(FIFO2, 1);
+        write (writefd, &msgid, sizeof(int));
+        write (writefd, &msgcnt, sizeof(msgcnt));
+        write (writefd, &flag, sizeof(int));
+        write (writefd, &flagfiles, sizeof(int));
+        write (writefd, &flagpass, sizeof(int));
+        printf("No such file \n");
+      }
+    }else{
+      printf("Wrong password: %s \n",pass);
+      flagfiles = -1;
+      flagpass = -1;
+      writefd = open(FIFO2, 1);
+      write (writefd, &msgid, sizeof(int));
+      write (writefd, &msgcnt, sizeof(msgcnt));
+      write (writefd, &flag, sizeof(int));
+      write (writefd, &flagfiles, sizeof(int));
+      write (writefd, &flagpass, sizeof(int));
+
+    }
+    }
+
+      break;
       case 0:
         list = escreverDados(list);
         free(list);
         exit(1);
       break;
+
     }
   }
   return 0;
