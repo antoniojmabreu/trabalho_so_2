@@ -67,35 +67,50 @@ void listNodes(Abstrata  *A) {  //lista todas as mensagens
   }
 }
 
-void escreverDados(Abstrata *A) {
-  FILE* fout = fopen("data.dat", "w");
+Abstrata* escreverDados(Abstrata *A) {
+  FILE* fout = fopen("data.txt", "w");
+  Abstrata *head = A;
 
   if (fout == NULL) {
     fprintf(stderr, "\nError opend file\n");
     exit (1);
   }
 
-  fwrite(&A, sizeof(Abstrata), 1, fout);
+  while(A != NULL) {
+    fprintf(fout,"%d\n", A->msgId);
+    fprintf(fout,"%s\n", A->content);
+    A = A->nseg;
+  }
+
   fclose(fout);
 
+  return head;
 }
 
-Abstrata* carregaDados() {
-  Abstrata *newAbstrata; //= (Abstrata*)malloc(sizeof(Abstrata));
+void carregaDados(Abstrata **A) {
 
-  FILE* fin = fopen("data.dat", "r");
+  char c[SIZE], a[SIZE];
+  FILE* fin = fopen("data.txt", "r");
+
+  *A = removeNodeId(*A, 0);
 
   if (fin == NULL) {
     fprintf(stderr, "\nError opend file\n");
     exit (1);
   }
 
-  while(fread(&newAbstrata, sizeof(Abstrata), 1, fin))
-    fread(&newAbstrata, sizeof(Abstrata), 1, fin);
+  while(!feof(fin)) {
+    fgets(a, SIZE, fin);
+    printf("int %d\n", atoi(a));
+    fgets(c, SIZE, fin);
+    printf("char %s\n", c);
+
+    *A = insertNode(*A, createNode(atoi(a), c));
+    fgets(c, SIZE, fin);
+  }
+
 
   fclose(fin);
-
-  return newAbstrata;
 }
 
 int countMsg(Abstrata *A) {
@@ -131,7 +146,8 @@ int main () {
   int select, x, ID, msgid, count = 0, flag;
   char content[SIZE], msgcnt[SIZE];
 
-  list = carregaDados();
+  carregaDados(&list);
+  //list = removeNodeId(list, 0);
 
   while(1) {
     readfd = open(FIFO1, 0);
@@ -184,8 +200,6 @@ int main () {
         if(findMsg(list, x) == 1) {
           flag = 1;
           list = removeNodeId(list, x);
-          //if(count > 0)
-            //count--;
         }
 
         writefd = open(FIFO2, 1);
@@ -195,7 +209,7 @@ int main () {
 
       break;
       case 0:
-        escreverDados(list);
+        list = escreverDados(list);
         free(list);
         exit(1);
       break;

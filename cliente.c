@@ -131,28 +131,8 @@ int main() {
     }
   }
 
-  //readfd = open(FIFO2, 0);
-  //read(readfd, &res, SR);
-
   unlink(FIFO1);
   unlink(FIFO2);
-  //printf("Result %.3f\n",res);
 
   return 0;
 }
-/*
-int main() {
-  int select = 0;
-  pthread_t th;
-
-  while (1) {
-    printMenu();
-    scanf("%d", &select);
-    select_t * ptr = (select_t *)malloc( sizeof(select_t));
-    ptr->select = select;
-    pthread_create(&th, NULL, thread, (void *)ptr);
-    pthread_join(th, NULL);
-    printf("check 1\n" );
-  }
-}
-*/
