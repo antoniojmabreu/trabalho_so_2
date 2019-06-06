@@ -19,6 +19,11 @@ typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos I
   struct ABSTRATA *nseg;
 }Abstrata;
 
+typedef struc FILA {
+  int filaId;
+  Abstrata *cabeca;
+  struc FILA *nseg;
+}Fila;
 
 Abstrata* insertNode(Abstrata *A, Abstrata *nv) {      //insere uma nova mensagem na struct
                                                        //estilo insertFirst para não ter de correr as listas para descobrir o ultimo elemento
@@ -154,7 +159,6 @@ int main () {
     switch (select){
       case 1 :
         list = insertNode(list, createNode(ID, content));
-        //count++;
       break;
       case 2 :
         if(list == NULL) {
