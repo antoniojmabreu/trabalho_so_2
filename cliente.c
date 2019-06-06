@@ -43,7 +43,6 @@ int main() {
   printMenu();
 
   while(1) {
-    printf("OI\n" );
     scanf("%d", &select);
     switch (select) {
       case 1:
@@ -61,6 +60,8 @@ int main() {
         write(writefd, &ID, sizeof(int));
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
+        write(writefd,&fich,sizeof(fich));
+
 
         printMenu();
       break;
@@ -72,6 +73,7 @@ int main() {
         write(writefd, &ID, sizeof(int));
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
+        write(writefd,&fich,sizeof(fich));
 
         while (1) {
           readfd = open(FIFO2, 0);
@@ -104,6 +106,7 @@ int main() {
         write(writefd, &ID, sizeof(int));
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
+        write(writefd,&fich,sizeof(fich));
 
         readfd = open(FIFO2, 0);
         read(readfd, &msgid, sizeof(int));
