@@ -15,6 +15,7 @@
 //typedef's
 typedef struct ABSTRATA {  //struc para guardar as mensagens com os respetivos IDs
   int msgId;
+  int filaId;
   char content[SIZE];
   struct ABSTRATA *nseg;
 }Abstrata;
@@ -49,10 +50,40 @@ Abstrata* removeNodeId(Abstrata *A, int id) {  //remove por id e devolve cabeça
   return head;
 }
 
-Abstrata* createNode(int ID, char content[]) {  //cria uma nova mensagem
+void removeFila(Abstrata **root, int value){
+  if(*root != NULL) {
+    Abstrata *temp = *root, *helper = *root;
+
+      while(temp){
+        if(temp->filaId == value){
+          if(temp == *root){
+            helper = temp;
+            *root = (*root)->nseg;
+            temp = *root;
+            helper->nseg = NULL;
+
+            free(helper);
+            helper = NULL;
+        }
+        else{
+          helper->nseg = temp->nseg;
+          temp->nseg = NULL;
+          free(temp);
+          temp = helper->nseg;
+        }
+      }else{
+      helper =temp;
+      temp = temp->nseg;
+    }
+   }
+  }
+}
+
+Abstrata* createNode(int ID, char content[], int fila) {  //cria uma nova mensagem
 
   Abstrata *newAbstrata = (Abstrata*)malloc(sizeof(Abstrata));
   newAbstrata->msgId = ID;
+  newAbstrata->filaId = fila;
   strcpy(newAbstrata->content, content);
 
   return newAbstrata;
@@ -60,14 +91,16 @@ Abstrata* createNode(int ID, char content[]) {  //cria uma nova mensagem
 
 void listNodes(Abstrata  *A) {  //lista todas as mensagens
   while(A != NULL) {
-    printf("\nmsgId: %d\n", A->msgId);
-    printf("content: \n%s\n\n", A->content);
+    printf("fila %d\n", A->filaId);
+    printf("msgId: %d\n", A->msgId);
+    printf("content: %s\n\n", A->content);
 
     A = A->nseg;
   }
 }
 
 Abstrata* escreverDados(Abstrata *A) {
+  remove("data.txt");
   FILE* fout = fopen("data.txt", "w");
   Abstrata *head = A;
 
@@ -77,8 +110,9 @@ Abstrata* escreverDados(Abstrata *A) {
   }
 
   while(A != NULL) {
+    fprintf(fout,"%d\n", A->filaId);
     fprintf(fout,"%d\n", A->msgId);
-    fprintf(fout,"%s\n", A->content);
+    fprintf(fout,"%s", A->content);
     A = A->nseg;
   }
 
@@ -88,11 +122,8 @@ Abstrata* escreverDados(Abstrata *A) {
 }
 
 void carregaDados(Abstrata **A) {
-
-  char c[SIZE], a[SIZE];
+  char c[SIZE], a[SIZE], b[SIZE];
   FILE* fin = fopen("data.txt", "r");
-
-  *A = removeNodeId(*A, 0);
 
   if (fin == NULL) {
     fprintf(stderr, "\nError opend file\n");
@@ -100,15 +131,13 @@ void carregaDados(Abstrata **A) {
   }
 
   while(!feof(fin)) {
+    fgets(b, SIZE, fin);
     fgets(a, SIZE, fin);
-    printf("int %d\n", atoi(a));
     fgets(c, SIZE, fin);
-    printf("char %s\n", c);
 
-    *A = insertNode(*A, createNode(atoi(a), c));
-    fgets(c, SIZE, fin);
+    if(strcmp(c, "") != 0) *A = insertNode(*A, createNode(atoi(a), c, atoi(b)));
+    //fgets(c, SIZE, fin);
   }
-
 
   fclose(fin);
 }
@@ -123,6 +152,17 @@ int countMsg(Abstrata *A) {
   return count;
 }
 
+int countFila(Abstrata *A, int ID) {
+  int count = 0;
+
+  while(A != NULL) {
+    if(A->filaId == ID)
+      count ++;;
+    A = A->nseg;
+  }
+
+  return count;
+}
 
 int findMsg(Abstrata *A, int ID) {
   Abstrata *head = A;
@@ -143,11 +183,13 @@ int main () {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   Abstrata *list = NULL, *head = NULL;
-  int select, x, ID, msgid, count = 0, flag;
-  char content[SIZE], msgcnt[SIZE];
+  int select, x, ID, msgid, count = 0, flag, fila, filaid;
+  char content[SIZE], msgcnt[SIZE], fich[SIZE];
 
   carregaDados(&list);
-  //list = removeNodeId(list, 0);
+  list = removeNodeId(list, 0);
+  if(list != NULL)
+    list = list->nseg;
 
   while(1) {
     readfd = open(FIFO1, 0);
@@ -155,10 +197,15 @@ int main () {
     read(readfd, &ID, sizeof(int));
     read(readfd, &x, sizeof(int));
     read(readfd, &content, sizeof(content));
+    read(readfd, &fich, sizeof(fich));
+    read(readfd, &fila, sizeof(int));
 
     switch (select){
       case 1 :
-        list = insertNode(list, createNode(ID, content));
+        printf("fila %d\n", fila);
+        printf("id %d\n", ID);
+        printf("cont %s\n", content);
+        list = insertNode(list, createNode(ID, content, fila));
         //count++;
       break;
       case 2 :
@@ -167,6 +214,7 @@ int main () {
           printf("\nNo messages\n");
 
           writefd = open(FIFO2, 1);
+          write (writefd, &filaid, sizeof(int));
           write (writefd, &msgid, sizeof(int));
           write (writefd, &msgcnt, sizeof(msgcnt));
           write (writefd, &flag, sizeof(int));
@@ -177,10 +225,12 @@ int main () {
           head = list;
 
           while(list != NULL) {
+            filaid = list->filaId;
             msgid = list->msgId;
-            printf("%d\n", list->msgId);
             strcpy(msgcnt, list->content);
+
             writefd = open(FIFO2, 1);
+            write (writefd, &filaid, sizeof(int));
             write (writefd, &msgid, sizeof(int));
             write (writefd, &msgcnt, sizeof(msgcnt));
             write (writefd, &flag, sizeof(int));
@@ -203,12 +253,53 @@ int main () {
         }
 
         writefd = open(FIFO2, 1);
+        write (writefd, &filaid, sizeof(int));
         write (writefd, &msgid, sizeof(int));
         write (writefd, &msgcnt, sizeof(msgcnt));
         write (writefd, &flag, sizeof(int));
 
       break;
+      case 5:
+        if(countFila(list, x) == 0) {
+          flag = -1;
+          printf("\nNo messages\n");
+
+          writefd = open(FIFO2, 1);
+          write (writefd, &filaid, sizeof(int));
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+        }
+        else {
+          count = countFila(list, x);
+          flag = count;
+          head = list;
+
+          while(list != NULL) {
+            if(list->filaId == x) {
+              filaid = list->filaId;
+              msgid = list->msgId;
+              strcpy(msgcnt, list->content);
+
+              writefd = open(FIFO2, 1);
+              write (writefd, &filaid, sizeof(int));
+              write (writefd, &msgid, sizeof(int));
+              write (writefd, &msgcnt, sizeof(msgcnt));
+              write (writefd, &flag, sizeof(int));
+              printf("flag %d\n", flag);
+              flag--;
+            }
+            list = list->nseg;
+          }
+          list = head;
+          listNodes(list);
+        }
+      break;
+      case 6:
+        removeFila(&list, x);
+      break;
       case 0:
+        fflush(stdin);
         list = escreverDados(list);
         free(list);
         exit(1);
