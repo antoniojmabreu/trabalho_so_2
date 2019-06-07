@@ -1,6 +1,7 @@
 #!/bin/bash
 
-gcc -Wall servidor.c -o servidor
+#gcc -Wall -pthread servidor.c -o servidor
+gcc -Wall -o servidor servidor.c -lpthread
 
 gcc -Wall cliente.c -o cliente
 
