@@ -189,8 +189,10 @@ int main () {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   Abstrata *list = NULL, *head = NULL;
-  int select, x, ID, msgid, count = 0, flag, fila, filaid;
-  char content[SIZE], msgcnt[SIZE], fich[SIZE];
+  int select, x, ID, msgid, count = 0,check, flag,flagfiles,flagpass, filaid,fila;
+  char content[SIZE], msgcnt[SIZE],fich[SIZE],pass[20];
+  FILE *fp;
+  char password[20] = "secret";
 
   carregaDados(&list);
   list = removeNodeId(list, 0);
@@ -204,6 +206,7 @@ int main () {
     read(readfd, &x, sizeof(int));
     read(readfd, &content, sizeof(content));
     read(readfd, &fich, sizeof(fich));
+    read(readfd,&pass,sizeof(pass));
     read(readfd, &fila, sizeof(int));
 
     switch (select){
@@ -224,6 +227,8 @@ int main () {
           write (writefd, &msgid, sizeof(int));
           write (writefd, &msgcnt, sizeof(msgcnt));
           write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
         }
         else {
           count = countMsg(list);
@@ -240,6 +245,8 @@ int main () {
             write (writefd, &msgid, sizeof(int));
             write (writefd, &msgcnt, sizeof(msgcnt));
             write (writefd, &flag, sizeof(int));
+            write (writefd, &flagfiles, sizeof(int));
+            write (writefd, &flagpass, sizeof(int));
             printf("flag %d\n", flag);
             flag--;
 
@@ -263,9 +270,110 @@ int main () {
         write (writefd, &msgid, sizeof(int));
         write (writefd, &msgcnt, sizeof(msgcnt));
         write (writefd, &flag, sizeof(int));
+        write (writefd, &flagfiles, sizeof(int));
+        write (writefd, &flagpass, sizeof(int));
 
       break;
+      case 4:
+        printf("File requested: %s\n",fich);
+         check = checkFilename(fich);
+        if(check==0){
+
+          printf("File Not allowed\n");
+          flagfiles = -1;
+          writefd = open(FIFO2, 1);
+          write (writefd, &filaid, sizeof(int));
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
+        }else{
+
+        fp = fopen(fich,"r");
+        if(fp!=NULL){
+          flagfiles=1;
+          writefd = open(FIFO2, 1);
+          write (writefd, &filaid, sizeof(int));
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
+
+        }else{
+          flagfiles = -1;
+          writefd = open(FIFO2, 1);
+          write (writefd, &filaid, sizeof(int));
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
+
+          printf("No such file \n");
+        }
+
+      }
+      break;
       case 5:
+        printf("File requested: %s\n",fich);
+        printf("Password inserida: %s\n",pass);
+
+         check = checkFilename(fich);
+        if(check==0){
+          printf("File Not allowed\n");
+          flagfiles = -1;
+          flagpass = -1;
+          writefd = open(FIFO2, 1);
+          write (writefd, &filaid, sizeof(int));
+          write (writefd, &msgid, sizeof(int));
+          write (writefd, &msgcnt, sizeof(msgcnt));
+          write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
+        }else{
+
+          if(strcmp(pass,password)==0){
+            fp = fopen(fich,"r");
+            if(fp!=NULL){
+              flagfiles=1;
+              writefd = open(FIFO2, 1);
+              write (writefd, &filaid, sizeof(int));
+              write (writefd, &msgid, sizeof(int));
+              write (writefd, &msgcnt, sizeof(msgcnt));
+              write (writefd, &flag, sizeof(int));
+              write (writefd, &flagfiles, sizeof(int));
+              write (writefd, &flagpass, sizeof(int));
+            }else{
+              flagfiles = -1;
+              writefd = open(FIFO2, 1);
+              write (writefd, &filaid, sizeof(int));
+              write (writefd, &msgid, sizeof(int));
+              write (writefd, &msgcnt, sizeof(msgcnt));
+              write (writefd, &flag, sizeof(int));
+              write (writefd, &flagfiles, sizeof(int));
+              write (writefd, &flagpass, sizeof(int));
+              printf("No such file \n");
+           }
+          }else{
+            printf("Wrong password: %s \n",pass);
+            flagfiles = -1;
+            flagpass = -1;
+            writefd = open(FIFO2, 1);
+            write (writefd, &filaid, sizeof(int));
+            write (writefd, &msgid, sizeof(int));
+            write (writefd, &msgcnt, sizeof(msgcnt));
+            write (writefd, &flag, sizeof(int));
+            write (writefd, &flagfiles, sizeof(int));
+            write (writefd, &flagpass, sizeof(int));
+
+          }
+        }
+
+      break;
+
+      case 6:
         if(countFila(list, x) == 0) {
           flag = -1;
           printf("\nNo messages\n");
@@ -275,6 +383,8 @@ int main () {
           write (writefd, &msgid, sizeof(int));
           write (writefd, &msgcnt, sizeof(msgcnt));
           write (writefd, &flag, sizeof(int));
+          write (writefd, &flagfiles, sizeof(int));
+          write (writefd, &flagpass, sizeof(int));
         }
         else {
           count = countFila(list, x);
@@ -292,6 +402,8 @@ int main () {
               write (writefd, &msgid, sizeof(int));
               write (writefd, &msgcnt, sizeof(msgcnt));
               write (writefd, &flag, sizeof(int));
+              write (writefd, &flagfiles, sizeof(int));
+              write (writefd, &flagpass, sizeof(int));
               printf("flag %d\n", flag);
               flag--;
             }
@@ -301,7 +413,7 @@ int main () {
           listNodes(list);
         }
       break;
-      case 6:
+      case 7:
         removeFila(&list, x);
       break;
       case 0:

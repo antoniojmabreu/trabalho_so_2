@@ -35,8 +35,8 @@ int main() {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
-  int ID = 0, x, msgid, flag, select, flagfiles, fila, filaid;
-  char msgcnt[SIZE], content[SIZE], fich[SIZE], a[SIZE];
+  int ID = 0, x, msgid, flag, select,select2, flagfiles, fila, filaid,flagpass;
+  char msgcnt[SIZE], content[SIZE], fich[SIZE], a[SIZE],pass[20];
   FILE *fp, *fin = fopen("data.txt", "r");
   char c;
 
@@ -66,7 +66,8 @@ int main() {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
         write(writefd,&fich,sizeof(fich));
-        write(writefd,&fila,sizeof(int));
+        write(writefd,&pass,sizeof(pass));
+        write(writefd,&fila,sizeof(fila));
 
 
         printMenu();
@@ -80,7 +81,8 @@ int main() {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
         write(writefd,&fich,sizeof(fich));
-        write(writefd,&fila,sizeof(int));
+        write(writefd,&pass,sizeof(pass));
+        write(writefd,&fila,sizeof(fila));
 
         while (1) {
           readfd = open(FIFO2, 0);
@@ -88,6 +90,8 @@ int main() {
           read(readfd, &msgid, sizeof(int));
           read(readfd, &msgcnt, sizeof(msgcnt));
           read(readfd, &flag, sizeof(int));
+          read(readfd, &flagfiles, sizeof(int));
+          read(readfd, &flagpass, sizeof(int));
 
           if(flag == -1) {
             printf("\nSem mensagens\n");
@@ -116,13 +120,16 @@ int main() {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
         write(writefd,&fich,sizeof(fich));
-        write(writefd,&fila,sizeof(int));
+        write(writefd,&pass,sizeof(pass));
+        write(writefd,&fila,sizeof(fila));
 
         readfd = open(FIFO2, 0);
         read(readfd, &filaid, sizeof(int));
         read(readfd, &msgid, sizeof(int));
         read(readfd, &msgcnt, sizeof(msgcnt));
         read(readfd, &flag, sizeof(int));
+        read(readfd, &flagfiles, sizeof(int));
+        read(readfd, &flagpass, sizeof(int));
 
         if(flag == 0)
           printf("msgId = '%d' não existe\n", x);
@@ -130,6 +137,10 @@ int main() {
         printMenu();
       break;
       case 4:
+      printf("1 -> Ficheiros normais\n2 -> Ficheiros secretos\n");
+      scanf("%d", &select2);
+      switch (select2) {
+      case 1:
         printf("Insira o nome do ficheiro a abir:\n");
         scanf("%s",fich);
 
@@ -139,7 +150,8 @@ int main() {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
         write(writefd,&fich,sizeof(fich));
-        write(writefd,&fila,sizeof(int));
+        write(writefd,&pass,sizeof(pass));
+        write(writefd,&fila,sizeof(fila));
 
         while(1){
           readfd = open(FIFO2, 0);
@@ -148,8 +160,9 @@ int main() {
           read(readfd, &msgcnt, sizeof(msgcnt));
           read(readfd, &flag, sizeof(int));
           read(readfd, &flagfiles, sizeof(int));
+          read(readfd, &flagpass, sizeof(int));
 
-          if(flagfiles== -1){ printf("\n No such file"); }
+          if(flagfiles== -1){ printf("No such file or not allowed\n"); }
           if(flagfiles == 1){
             //abrir Ficheiro
             printf("SUCESS\n");
@@ -163,9 +176,55 @@ int main() {
           }
           break;
           }
-      printMenu();
-      break;
+
+          break;
+
+          case 2:
+            select = 5;
+
+            printf("Insira o nome do ficheiro a abir:\n");
+            scanf("%s",fich);
+            char pass[20];
+            printf("Insira a password\n");
+            scanf("%s",pass);
+
+            writefd = open(FIFO1, 1);
+            write(writefd, &select, sizeof(int));
+            write(writefd, &ID, sizeof(int));
+            write(writefd, &x, sizeof(int));
+            write(writefd, &content, sizeof(content));
+            write(writefd,&fich,sizeof(fich));
+            write(writefd,&pass,sizeof(pass));
+            write(writefd,&fila,sizeof(fila));
+
+            while(1){
+              readfd = open(FIFO2, 0);
+              read(readfd, &filaid, sizeof(int));
+              read(readfd, &msgid, sizeof(int));
+              read(readfd, &msgcnt, sizeof(msgcnt));
+              read(readfd, &flag, sizeof(int));
+              read(readfd, &flagfiles, sizeof(int));
+              read(readfd, &flagpass, sizeof(int));
+
+              if(flagpass== -1){ printf("Wrong password\n"); }
+              if(flagfiles == 1){
+                //abrir Ficheiro
+                printf("SUCESS\n");
+                fp = fopen(fich,"r");
+                c = fgetc(fp);
+
+                while(c != EOF){
+                  printf("%c",c);
+                  c = fgetc(fp);
+                }
+              }
+              break;
+              }
+            }
+    printMenu();
+    break;
       case 5:
+        select = 6;
         printf("Insira a fila a mostrar\n");
         scanf("%d", &x);
 
@@ -176,7 +235,8 @@ int main() {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
         write(writefd,&fich,sizeof(fich));
-        write(writefd,&fila,sizeof(int));
+        write(writefd,&pass,sizeof(pass));
+        write(writefd,&fila,sizeof(fila));
 
         while (1) {
           readfd = open(FIFO2, 0);
@@ -184,9 +244,11 @@ int main() {
           read(readfd, &msgid, sizeof(int));
           read(readfd, &msgcnt, sizeof(msgcnt));
           read(readfd, &flag, sizeof(int));
+          read(readfd, &flagfiles, sizeof(int));
+          read(readfd, &flagpass, sizeof(int));
 
           if(flag == -1) {
-            printf("\nSem mensagens\n");
+            printf("\nFila não existe\n");
             break;
           }
 
@@ -201,6 +263,7 @@ int main() {
         printMenu();
       break;
       case 6:
+      select = 7;
         //remove mensagem por id
         printf("Insira a fila a remover\n");
         scanf("%d", &x);
@@ -211,7 +274,8 @@ int main() {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
         write(writefd,&fich,sizeof(fich));
-        write(writefd,&fila,sizeof(int));
+        write(writefd,&pass,sizeof(pass));
+        write(writefd,&fila,sizeof(fila));
 
         printf("DONE\n");
 
@@ -225,7 +289,8 @@ int main() {
         write(writefd, &x, sizeof(int));
         write(writefd, &content, sizeof(content));
         write(writefd,&fich,sizeof(fich));
-        write(writefd,&fila,sizeof(int));
+        write(writefd,&pass,sizeof(pass));
+        write(writefd,&fila,sizeof(fila));
 
         exit(1);
       break;
