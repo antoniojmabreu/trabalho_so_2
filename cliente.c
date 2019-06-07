@@ -24,6 +24,31 @@ typedef struct SELECT_T {
   int select;
 }select_t;
 
+int carregaId() {
+  FILE *fin = fopen("id.txt", "r");
+  char a[SIZE];
+
+  if (fin == NULL) {
+    fprintf(stderr, "\nError opend file\n");
+    exit (1);
+  }
+
+  fgets(a, SIZE, fin);
+
+  return atoi(a);
+}
+
+void guardaId(int ID) {
+  FILE *fout = fopen("id.txt", "w");
+
+  if (fout == NULL) {
+    fprintf(stderr, "\nError opend file\n");
+    exit (1);
+  }
+
+  fprintf(fout,"%d\n", ID);
+}
+
 void printMenu() {
   printf("\n\n1 -> Nova mensagem\n2 -> Mostrar todas as mensagens\n3 -> Remover mensagem\n4 -> Ficheiros\n5 -> Mostrar fila\n6 -> Remover fila\n0 -> exit\n\n->");
 }
@@ -37,19 +62,17 @@ int main() {
   float readfd, writefd;
   int ID = 0, x, msgid, flag, select,select2, flagfiles, fila, filaid,flagpass;
   char msgcnt[SIZE], content[SIZE], fich[SIZE], a[SIZE],pass[20];
-  FILE *fp, *fin = fopen("data.txt", "r");
+  FILE *fp;
   char c;
 
-  printMenu();
+  ID = carregaId();
 
-  fgets(a, SIZE, fin);
-  ID = atoi(a);
+  printMenu();
 
   while(1) {
     scanf("%d", &select);
     switch (select) {
       case 1:
-
         //inserir nova mensagem na lista
         ID++;
         printf("Insira a fila:\n");
@@ -292,6 +315,7 @@ int main() {
         write(writefd,&pass,sizeof(pass));
         write(writefd,&fila,sizeof(fila));
 
+        guardaId(ID);
         exit(1);
       break;
 
