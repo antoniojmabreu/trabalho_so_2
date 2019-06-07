@@ -61,7 +61,7 @@ int main() {
   mknod(FIFO2, S_IFIFO | PERMS, 0);
   float readfd, writefd;
   int ID = 0, x, msgid, flag, select,select2, flagfiles, fila, filaid,flagpass;
-  char msgcnt[SIZE], content[SIZE], fich[SIZE],pass[20];
+  char msgcnt[SIZE], content[SIZE], fich[SIZE], pass[20];
   FILE *fp;
   char c;
 
