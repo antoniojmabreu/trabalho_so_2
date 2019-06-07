@@ -176,7 +176,13 @@ int findMsg(Abstrata *A, int ID) {
 
   return 0;
 }
+int checkFilename(char fich[SIZE]){
 
+    if(fich[0] == '.' && fich[1] == '.') {
+      return 0;
+    }
+  return 1;
+}
 
 int main () {
   mknod(FIFO1, S_IFIFO | PERMS, 0);
